@@ -1,39 +1,51 @@
-# MagixFeatured
+# GoogleRecaptcha
 
-[![Release](https://img.shields.io/github/release/magix-cms/magixfeatured.svg)](https://github.com/magix-cms/magixfeatured/releases/latest)
-[![License](https://img.shields.io/github/license/magix-cms/magixfeatured.svg)](LICENSE)
+[![Release](https://img.shields.io/github/release/magix-cms/google-recaptcha.svg)](https://github.com/magix-cms/google-recaptcha/releases/latest)
+[![License](https://img.shields.io/github/license/magix-cms/google-recaptcha.svg)](LICENSE)
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D%208.2-blue.svg)](https://php.net/)
 [![Magix CMS](https://img.shields.io/badge/Magix%20CMS-4.x-success.svg)](https://www.magix-cms.com/)
 
-**MagixFeatured** est un plugin de mise en avant de produits conçu spécifiquement pour **Magix CMS 4**. Il permet de dynamiser votre page d'accueil en affichant une sélection de produits phares (nouveautés, promotions ou coups de cœur) directement depuis votre catalogue.
+**GoogleRecaptcha** est un plugin de sécurité anti-spam de haute performance conçu pour **Magix CMS 4**. Il intègre de manière transparente la technologie Google reCAPTCHA v3 pour protéger vos formulaires sans imposer de contraintes visuelles (widgets) dans vos mises en page.
 
 ## 🚀 Installation
 
-1. Téléchargez et décompressez l'archive du plugin.
-2. Placez le dossier `MagixFeatured` dans le répertoire `plugins/` de votre installation.
-3. Connectez-vous à l'administration de votre site.
-4. Rendez-vous dans **Extensions** > **Gestionnaire**.
-5. Cliquez sur le bouton d'installation automatique pour **MagixFeatured**.
+### Option 1 : Via Composer (Recommandé)
 
-## 🛠 Utilisation & Layout
+1. Vérifiez que votre fichier `composer.json` autorise l'installation dans `/plugins/` :
 
-Tout comme pour le Slideshow, l'intégration est totalement pensée pour la modularité :
-* **Sélection :** Choisissez les produits que vous souhaitez mettre en avant via l'interface du plugin.
-* **Widget natif :** Une fois configuré, le module génère un **Widget** disponible dans l'outil de gestion du **Layout**.
-* **Mise en page :** Vous pouvez placer votre bloc de produits vedettes n'importe où sur la page d'accueil par simple glisser-déposer, permettant une totale liberté de design sans modifier les fichiers templates.
+```json
+"extra": {
+    "installer-paths": {
+      "plugins/GoogleRecaptcha/": ["magix-cms/google-recaptcha"]
+    }
+}
+```
+2. Exécutez : `composer require magix-cms/google-recaptcha`
+3. Dans l'administration : **Extensions** > **Gestionnaire** > **Installer**.
+
+### Option 2 : Installation Manuelle
+
+1. Placez le dossier `GoogleRecaptcha` dans le répertoire `plugins/`.
+2. Dans l'administration : **Extensions** > **Gestionnaire** > **Installation automatique**.
+
+## 🛠 Configuration & Logique Statique
+
+À la différence des modules de contenu, ce plugin utilise une logique de **Widget Statique**. Il n'apparaît pas dans le gestionnaire de Layout car sa présence est liée à la logique métier des formulaires :
+
+* **Configuration Centralisée :** Renseignez vos clés API (Clé de site et Clé secrète) v3 dans les paramètres du plugin.
+* **Activation par Module :** Sélectionnez les modules (ex: Contact, Inscription) que vous souhaitez protéger. Le plugin injecte alors automatiquement les scripts nécessaires sur les pages concernées.
+* **Hooks Automatiques :** Le plugin utilise les hooks système pour insérer le code JS de manière non-intrusive, garantissant une protection sans intervention manuelle dans vos templates.
 
 ## ✨ Fonctionnalités
 
-* **Intégration Catalogue :** Liaison directe avec le module `Product` pour récupérer automatiquement les prix, images et statuts.
-* **Multi-langues :** Affichage automatique des noms et descriptions selon la langue du visiteur.
-* **Design Responsive :** Grille de produits optimisée pour tous les supports (mobiles, tablettes, desktop).
-* **SEO & Performance :** Utilisation du Lazy-loading pour les images et balisage sémantique pour favoriser le référencement des produits.
-* **Badges automatiques :** Affichage des étiquettes "Promo" ou "Nouveau" si les données sont présentes en base.
+* **Protection Invisible :** Aucune case à cocher. L'analyse de risque de Google v3 se fait totalement en arrière-plan.
+* **Exécution Just-In-Time (JIT) :** Le jeton de sécurité est généré uniquement lors de la tentative de soumission du formulaire. Cela évite les erreurs d'expiration de jeton (2 minutes) fréquentes sur les formulaires longs à remplir.
+* **Validation Backend Robuste :** Utilisation de l'API de vérification Google via cURL avec gestion de timeout (compatible PHP 8.2+).
+* **Compatibilité AJAX :** Conçu pour fonctionner nativement avec `MagixFrontForms` pour des soumissions fluides sans rechargement de page.
+* **Zero Layout Impact :** Étant un widget statique, il ne modifie pas le design de votre site et ne surcharge pas le DOM inutilement.
 
 ## 📄 Licence
 
 Ce projet est sous licence **GPLv3**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 Copyright (C) 2008 - 2026 Gerits Aurelien (Magix CMS)
-
-Ce programme est un logiciel libre ; vous pouvez le redistribuer et/ou le modifier selon les termes de la Licence Publique Générale GNU telle que publiée par la Free Software Foundation ; soit la version 3 de la Licence, ou (à votre discrétion) toute version ultérieure.
