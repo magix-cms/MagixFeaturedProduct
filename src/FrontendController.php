@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Plugins\MagixFeatured\src;
+namespace Plugins\MagixFeaturedProduct\src;
 
-use Plugins\MagixFeatured\db\FeaturedFrontDb;
-use App\Frontend\Db\ProductDb; // 🟢 Import du moteur centralisé des produits
+use Plugins\MagixFeaturedProduct\db\FeaturedFrontDb;
+use App\Frontend\Db\ProductDb;
 use App\Frontend\Model\ProductPresenter;
 use Magepattern\Component\Tool\SmartyTool;
 
@@ -12,41 +12,53 @@ class FrontendController
 {
     public static function renderWidget(array $params = []): string
     {
-        $currentLang = $params['current_lang'] ?? ['id_lang' => 1, 'iso_lang' => 'fr'];
-        $idLang = (int)$currentLang['id_lang'];
-        $siteUrl = $params['site_url'] ?? 'http://localhost';
+        try {
+            $view = SmartyTool::getInstance('front');
 
-        // 1. Le plugin récupère sa propre liste d'IDs dans l'ordre voulu
-        $featuredDb = new FeaturedFrontDb();
-        $productIds = $featuredDb->getFeaturedProductIds();
+            $currentLang = $view->getTemplateVars('current_lang') ?: ['id_lang' => 1, 'iso_lang' => 'fr'];
+            $idLang      = (int)$currentLang['id_lang'];
+            $siteUrl     = $view->getTemplateVars('site_url') ?: 'http://localhost';
 
-        if (empty($productIds)) {
-            return ''; // Aucun produit phare configuré
-        }
+            $companyInfo = $view->getTemplateVars('companyData') ?: [];
+            $mcSettings  = $view->getTemplateVars('mc_settings') ?: [];
+            $skinFolder  = $mcSettings['theme']['value'] ?? 'default';
 
-        // 2. On délègue toute la logique complexe au cœur du CMS !
-        // (C'est ici que getProductsByIds va déclencher le hook 'extendProductList'
-        // et récupérer les éventuelles colonnes bonus des autres plugins)
-        $productDb = new ProductDb();
-        $rawProducts = $productDb->getProductsByIds($productIds, $idLang);
+            $featuredDb = new FeaturedFrontDb();
+            $productIds = $featuredDb->getFeaturedProductIds();
 
-        if (empty($rawProducts)) {
+            if (empty($productIds)) return '';
+
+            // Sécurité : Vérifier que la méthode existe dans ProductDb
+            if (!method_exists(ProductDb::class, 'getProductsByIds')) {
+                return '';
+            }
+
+            $productDb = new ProductDb();
+            $rawProducts = $productDb->getProductsByIds($productIds, $idLang);
+
+            if (empty($rawProducts)) return '';
+
+            $formattedProducts = [];
+            foreach ($rawProducts as $row) {
+                // 🟢 AJOUT DES PARAMÈTRES MANQUANTS POUR LE PRESENTER
+                $formatted = ProductPresenter::format($row, $currentLang, $siteUrl, $companyInfo, $skinFolder, $mcSettings);
+                if ($formatted) {
+                    $formattedProducts[] = $formatted;
+                }
+            }
+
+            $view->assign('featured_products', $formattedProducts);
+
+            // 🟢 CORRECTION DU NOM DU DOSSIER
+            $templatePath = ROOT_DIR . 'plugins/MagixFeaturedProduct/views/front/widget.tpl';
+            if (!file_exists($templatePath)) {
+                return '';
+            }
+
+            return $view->fetch($templatePath);
+
+        } catch (\Throwable $e) {
             return '';
         }
-
-        // 3. Formatage via le Presenter (qui attrape automatiquement les champs bonus)
-        $formattedProducts = [];
-        foreach ($rawProducts as $row) {
-            $formatted = ProductPresenter::format($row, $currentLang, $siteUrl);
-            if ($formatted) {
-                $formattedProducts[] = $formatted;
-            }
-        }
-
-        // 4. Envoi à Smarty
-        $view = SmartyTool::getInstance('front');
-        $view->assign('featured_products', $formattedProducts);
-
-        return $view->fetch(ROOT_DIR . 'plugins/MagixFeatured/views/front/widget.tpl');
     }
 }

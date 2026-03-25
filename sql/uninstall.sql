@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS `mc_guestbook_entries`;
+DROP TABLE IF EXISTS `mc_plug_featured_product_product`;

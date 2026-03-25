@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Plugins\MagixFeatured\db;
+namespace Plugins\MagixFeaturedProduct\db;
 
 use App\Frontend\Db\BaseDb;
 use Magepattern\Component\Database\QueryBuilder;
@@ -16,7 +16,7 @@ class FeaturedFrontDb extends BaseDb
     {
         $qb = new QueryBuilder();
         $qb->select(['id_product'])
-            ->from('mc_plug_featured')
+            ->from('mc_plug_featured_product')
             ->orderBy('position', 'ASC');
 
         $results = $this->executeAll($qb) ?: [];

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Plugins\MagixFeatured\db;
+namespace Plugins\MagixFeaturedProduct\db;
 
 use App\Backend\Db\BaseDb;
 use Magepattern\Component\Database\QueryBuilder;
@@ -38,7 +38,7 @@ class FeaturedAdminDb extends BaseDb
         $qb->select([
             'p.id_product', 'p.reference_p', 'c.name_p', 'cat_c.name_cat', 'feat.position'
         ])
-            ->from('mc_plug_featured', 'feat')
+            ->from('mc_plug_featured_product', 'feat')
             ->join('mc_catalog_product', 'p', 'feat.id_product = p.id_product')
             ->join('mc_catalog_product_content', 'c', 'p.id_product = c.id_product AND c.id_lang = ' . $idLang)
             ->leftJoin('mc_catalog', 'cat_rel', 'p.id_product = cat_rel.id_product AND cat_rel.default_c = 1')
@@ -50,12 +50,12 @@ class FeaturedAdminDb extends BaseDb
 
     public function saveFeaturedProducts(array $productIds): bool
     {
-        $this->executeRawSql('TRUNCATE TABLE mc_plug_featured');
+        $this->executeRawSql('TRUNCATE TABLE mc_plug_featured_product');
         if (empty($productIds)) return true;
 
         foreach ($productIds as $index => $id) {
             $qb = new QueryBuilder();
-            $qb->insert('mc_plug_featured', [
+            $qb->insert('mc_plug_featured_product', [
                 'id_product' => (int)$id,
                 'position'   => $index // L'ordre du tableau $_POST détermine la position !
             ]);

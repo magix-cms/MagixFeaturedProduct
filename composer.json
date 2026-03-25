@@ -15,7 +15,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Plugins\\MagixFeatured\\": "src/"
+      "Plugins\\MagixFeaturedProduct\\": "src/"
     }
   }
 }

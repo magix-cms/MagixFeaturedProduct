@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Plugins\MagixFeatured\src;
+namespace Plugins\MagixFeaturedProduct\src;
 
 use App\Backend\Controller\BaseController;
-use Plugins\MagixFeatured\db\FeaturedAdminDb;
+use Plugins\MagixFeaturedProduct\db\FeaturedAdminDb;
 use Magepattern\Component\HTTP\Request;
 
 class BackendController extends BaseController

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `mc_plug_featured` (
+CREATE TABLE IF NOT EXISTS `mc_plug_featured_product` (
     `id_featured` int(11) NOT NULL AUTO_INCREMENT,
     `id_product` int(11) NOT NULL,
     `position` int(11) DEFAULT 0,
