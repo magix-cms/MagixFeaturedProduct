@@ -6,6 +6,8 @@ namespace Plugins\MagixFeaturedProduct\src;
 use App\Backend\Controller\BaseController;
 use Plugins\MagixFeaturedProduct\db\FeaturedAdminDb;
 use Magepattern\Component\HTTP\Request;
+// CacheManager si vous l'utilisez
+use App\Component\Cache\CacheManager;
 
 class BackendController extends BaseController
 {
@@ -14,28 +16,28 @@ class BackendController extends BaseController
         $db = new FeaturedAdminDb();
         $idLang = (int)($this->defaultLang['id_lang'] ?? 1);
 
-        // 🟢 INTERCEPTION DE LA RECHERCHE AJAX
+        // RECHERCHE AJAX
         if (isset($_GET['action']) && $_GET['action'] === 'search') {
             $term = $_GET['q'] ?? '';
             if (strlen($term) > 1) {
-                $results = $db->searchActiveProducts($term, $idLang);
-                echo json_encode($results);
+                echo json_encode($db->searchActiveProducts($term, $idLang));
             } else {
                 echo json_encode([]);
             }
-            exit; // On stoppe le script pour ne renvoyer que le JSON
+            exit;
         }
 
-        // 🟢 SAUVEGARDE DU FORMULAIRE
+        // SAUVEGARDE
         if (Request::isMethod('POST')) {
             $token = $_POST['hashtoken'] ?? '';
             if (!$this->session->validateToken($token)) {
                 $this->jsonResponse(false, 'Session expirée.');
             }
 
-            // Les IDs arriveront dans l'ordre exact où ils sont dans le DOM HTML
-            $selectedIds = $_POST['featured_products'] ?? [];
-            if ($db->saveFeaturedProducts($selectedIds)) {
+            // On reçoit le même format que MagixFeaturedPages : data['slug'] = [id1, id2]
+            $data = $_POST['featured_products'] ?? [];
+            if ($db->saveAllInstances($data)) {
+                if (class_exists(CacheManager::class)) CacheManager::clearFrontend('magixfeaturedproduct');
                 $this->jsonResponse(true, 'Produits phares mis à jour avec succès.');
             } else {
                 $this->jsonResponse(false, 'Erreur de sauvegarde.');
@@ -43,8 +45,9 @@ class BackendController extends BaseController
             return;
         }
 
-        // 🟢 AFFICHAGE DE LA PAGE (On n'envoie QUE les produits sélectionnés)
+        // AFFICHAGE
         $this->view->assign([
+            'instances'         => $db->getRegisteredInstances(),
             'selected_products' => $db->getSelectedProductsFull($idLang),
             'hashtoken'         => $this->session->getToken()
         ]);

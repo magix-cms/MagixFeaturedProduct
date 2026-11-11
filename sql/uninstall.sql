@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS `mc_plug_featured_product_product`;
+DROP TABLE IF EXISTS `mc_plug_featured_product`;
